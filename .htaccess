@@ -1,0 +1,21 @@
+# prevent directory listings
+
+Options -Indexes
+
+IndexIgnore */*
+
+# follow symbolic links
+
+#Options +FollowSymlinks
+
+RewriteEngine on
+
+RewriteRule ^admin(.+)?$ backend/web/$1 [L,PT]
+RewriteRule ^(.+)?$ frontend/web/$1 [L,PT]
+
+<IfModule mod_rewrite.c> 
+  RewriteEngine on
+  
+  RewriteCond %{REQUEST_URI} !^public
+  RewriteRule ^(.*)$ frontend/web/$1 [L] 
+</IfModule>
