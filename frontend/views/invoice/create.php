@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model frontend\models\Invoice */
 
-$this->title = 'Create Invoice';
+$this->title = 'Payment';
 $this->params['breadcrumbs'][] = ['label' => 'Invoices', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -17,7 +17,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'modelInvoiceDetails' => $modelInvoiceDetails,
         'modelInvoiceTotal' => $modelInvoiceTotal,
-        'modelOrders' => $modelOrders,
         'invoice_no' => $invoice_no,
     ]) ?>
 

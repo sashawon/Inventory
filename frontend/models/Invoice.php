@@ -34,7 +34,9 @@ class Invoice extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['order_id', 'customer_id', 'paid_amount'], 'integer'],
+            [['order_id', 'customer_id'], 'integer'],
+            [['paid_amount'], 'integer', 'min' => 0],
+            [['paid_amount', 'payment_date'], 'required'],
             [['comment'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
             [['invoice_no'], 'string', 'max' => 255],

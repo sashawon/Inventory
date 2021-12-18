@@ -2,6 +2,8 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Url;
+use common\models\User;
 
 /* @var $this yii\web\View */
 /* @var $searchModel frontend\models\OrdersSearch */
@@ -26,25 +28,27 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
-            'order_id',
+            //'order_id',
+            //'user_id',
+            [
+                'label' => 'User Name',
+                'value' => function ($data){ return $data->user->username; },
+            ],
             'order_no',
-            'user_id',
             'total_price',
             // 'status',
             //'created_at',
             //'updated_at',
 
-            $buttons = [
-                'label' => 'Payment',
-//                'format' => 'raw',
-                'value' => Html::a('Create Orders', ['create'], ['class' => 'btn btn-success'])
-            ],
 
-
-            'buttons' => [
+            [
                 'label' => 'Payment',
-                'value' => function ($url, $model) {
-                    return Html::a('Payment', ['invoice/create', 'id'=>'1'], ['class' => 'btn btn-success']);
+                'format' => 'raw',
+                'value' => function ($data) {
+                    return Html::a('Payment',
+                        Url::to(['invoice/create', 'id' => $data->order_id]),
+                        ['class' => 'btn btn-sm btn-success']
+                    );
                 },
             ],
 

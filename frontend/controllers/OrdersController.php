@@ -69,7 +69,7 @@ class OrdersController extends Controller
 
     }
 
-    public function actionProductpricecount($id='', $quantity, $product_quantity, $product_total_price)
+    public function actionProductpricecount($id, $quantity, $product_quantity, $product_total_price)
     {
         // echo $quantity.$product_quantity.$product_total_price; die();
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -172,9 +172,13 @@ class OrdersController extends Controller
         if ($this->request->isPost) {
             // echo"<pre>"; var_dump($this->request->post()); die();
             if ($model->load($this->request->post()) && $model->save()) {
-                $modelsInvoiceOrderId = $modelsInvoice->order_id = $model->order_id;
-                $modelsInvoice->load($this->request->post()) && $modelsInvoiceOrderId && $modelsInvoice->save();
+
+                $modelsInvoiceOrderId =  $modelsInvoice->order_id = $model->order_id;
+                $modelsInvoice->payment_date = date("F j, Y, g:i a");
+                $modelsInvoice->load($this->request->post()) && $modelsInvoice->save(false);
 //                echo"<pre>"; var_dump($modelsInvoice); die();
+
+
                 $modelsOrdersDetails = Model::createMultiple(OrdersDetails::classname());
                 Model::loadMultiple($modelsOrdersDetails, Yii::$app->request->post());
 
@@ -196,19 +200,23 @@ class OrdersController extends Controller
                         }
                         if ($flag) {
                             $transaction->commit();
-                            $product_id = $this->request->post()["OrdersDetails"][0]["product_id"];
-                            $order_quantity = $this->request->post()["OrdersDetails"][0]["quantity"];
-                            $product_quantity = Product::find()->where(['product_id' => $product_id])->one();
-                            $current_quantity = $product_quantity->quantity - $order_quantity;
 
-                            // update an existing product quantity
-                            $product = Product::findOne($product_id);
-                            $product->quantity = $current_quantity;
-                            $product->save();
+                            foreach ($this->request->post()["OrdersDetails"] as $OrderDetail){
+                                $product_id = $OrderDetail["product_id"];
+                                $order_quantity = $OrderDetail["quantity"];
+                                $product_quantity = Product::find()->where(['product_id' => $product_id])->one();
+                                $current_quantity = $product_quantity->quantity - $order_quantity;
+
+                                // update an existing product quantity
+                                $product = Product::findOne($product_id);
+                                $product->quantity = $current_quantity;
+                                $product->save();
+                            }
 
                             $currentInvoice = Invoice::find()->where(['order_id' => $modelsInvoiceOrderId])->orderBy(['invoice_id' => SORT_DESC])->one();
+
 //                            echo "<pre>";
-//                            var_dump($currentInvoice->invoice_id);
+//                            var_dump($currentInvoice);
 //                            die();
 
                             return $this->redirect(['invoice/view', 'id' => $currentInvoice->invoice_id]);

@@ -17,13 +17,20 @@ use yii\jui\DatePicker;
         <div class="row">
             <div class="col-6">
                 <?php
+
+                $due = $modelInvoiceDetails[0]->orders['total_price'] - $modelInvoiceTotal;
+
                 echo "<table class='table table-striped table-light'>
                             <p><b>Order Information</b></p><hr>
                             <tbody>";
                 echo '
                             <tr>
-                                <td>Invoice No</td>
-                                <td>'.$form->field($model, 'invoice_no')->textInput(['value' => $invoice_no, 'readonly'=> true])->label(false).'</td>
+                                <td>Name</td>
+                                <td>'.$modelInvoiceDetails[0]->user['username'].'</td>
+                            </tr>
+                            <tr>
+                                <td>Phone</td>
+                                <td>'.$modelInvoiceDetails[0]->user['phone'].'</td>
                             </tr>
                             <tr>
                                 <td>Order No</td>
@@ -33,13 +40,9 @@ use yii\jui\DatePicker;
                                 <td>Order Date</td>
                                 <td>'.$modelInvoiceDetails[0]->orders['created_at'].'</td>
                             </tr>
-                            <tr>
-                                <td>payment Date</td>
-                                <td>'.$form->field($model, 'payment_date')->widget(DatePicker::className(),['clientOptions' => ['dateFormat' => 'yy-mm-dd']])->textInput(['placeholder' => \Yii::t('app', 'mm/dd/yyyy'), 'class' => 'form-control'])->label(false).'</td>
-                            </tr>
-                            <tr>
-                                <td>Order Status</td>
-                                <td>'.$modelInvoiceDetails[0]->orders['status'].'</td>
+                            <tr class="bg-light">
+                                <td>Comment</td>
+                                <td>'. $form->field($model, 'comment')->textarea(['rows' => 3])->label(false) .'</td>
                             </tr>
                         ';
                 echo"</tbody>
@@ -49,97 +52,26 @@ use yii\jui\DatePicker;
             <div class="col-6">
                 <?php
                 echo "<table class='table table-striped table-light'>
-                            <p><b>User Information</b></p><hr>
+                            <p><b>Payment Details</b></p><hr>
                             <tbody>";
                 echo '
+                        
                         <tr>
-                            <td>Name</td>
-                            <td>'.$modelInvoiceDetails[0]->user['username'].'</td>
+                            <td>payment Date</td>
+                            <td>'.$form->field($model, 'payment_date')->widget(DatePicker::className(),['clientOptions' => ['dateFormat' => 'yy-mm-dd']])->textInput(['placeholder' => \Yii::t('app', 'mm/dd/yyyy'), 'class' => 'form-control'])->label(false).'</td>
                         </tr>
-                        <tr>
-                            <td>Address</td>
-                            <td>'.$modelInvoiceDetails[0]->user['address'].'</td>
-                        </tr>
-                        <tr>
-                            <td>Email</td>
-                            <td>'.$modelInvoiceDetails[0]->user['email'].'</td>
-                        </tr>
-                        <tr>
-                            <td>Phone</td>
-                            <td>'.$modelInvoiceDetails[0]->user['phone'].'</td>
-                        </tr>
-                    ';
-                echo "</tbody>
-                        </table>";
-                ?>
-            </div>
-            <div class="col-12 mt-5">
-                <?php
-                $i = 1;
-
-                echo "<table class='table table-striped table-light'>
-                            <p><b>Items Invoiced</b></p><hr>
-                            <thead>
-                                <tr>
-                                    <td>SL.</td>
-                                    <td>Product Name</td>
-                                    <td>Quantity</td>
-                                    <td>Price</td>
-                                </tr>
-                            </thead>
-                            <tbody>";
-                foreach($modelOrders as $modelOrder){
-                    echo '
-                            <tr>
-                                <td>'.$i++.'</td>
-                                <td>'.$modelOrder->product->name.'</td>
-                                <td>'.$modelOrder->quantity.'</td>
-                                <td>'.$modelOrder->total_price.'</td>
-                            </tr>
-                        ';
-                }
-                echo "</tbody>
-                        </table>";
-                ?>
-            </div>
-            <div class="col-6 mt-5">
-                <?php
-                echo "<table class='table table-striped table-light'>
-                            <p><b>Comment</b></p><hr>
-                            <tbody>";
-                echo '
-                        <tr class="bg-light">
-                            <td class="p-0">'. $form->field($model, 'comment')->textarea(['rows' => 6])->label(false) .'</td>
-                        </tr>
-                    ';
-                echo "</tbody>
-                        </table>";
-                ?>
-            </div>
-            <div class="col-6 mt-5">
-                <?php
-                echo "<table class='table table-striped table-light'>
-                            <p><b>Invoice Total</b></p><hr>
-                            <tbody>";
-                echo '
                         <tr>
                             <td>Total Price</td>
                             <td>'.$modelInvoiceDetails[0]->orders['total_price'].'</td>
                         </tr>
                         <tr>
-                            <td>Total Paid</td>
-                            <td>'.$modelInvoiceTotal.'</td>
-                        </tr>
-                        <tr>
                             <td>Due</td>
-                            <td>';
-                                echo $modelInvoiceDetails[0]->orders['total_price'] - $modelInvoiceTotal;
-                            echo '</td>
+                            <td class="due">'.$due.'</td>
                         </tr>
                         <tr>
                             <td>Amount</td>
-                            <td>'.$form->field($model, 'paid_amount')->textInput()->label(false).'</td>
-                        </tr>
+                            <td>'.$form->field($model, 'paid_amount')->textInput(['type'=>'number', 'class' => 'form-control paid-amount'])->label(false).'</td>
+                        </tr>                        
                     ';
                 echo "</tbody>
                         </table>";
@@ -149,10 +81,11 @@ use yii\jui\DatePicker;
     </div>
 
 
+    <?= $form->field($model, 'invoice_no')->hiddenInput(['value' => $invoice_no, 'readonly'=> true])->label(false) ?>
+
     <?= $form->field($model, 'order_id')->hiddenInput(['value' => $modelInvoiceDetails[0]->orders['order_id']])->label(false) ?>
 
     <?= $form->field($model, 'customer_id')->hiddenInput(['value' => $modelInvoiceDetails[0]->orders['user_id']])->label(false) ?>
-
 
     <?= $form->field($model, 'created_at')->hiddenInput(['value' => date("F j, Y, g:i a")])->label(false) ?>
 
@@ -163,3 +96,28 @@ use yii\jui\DatePicker;
     <?php ActiveForm::end(); ?>
 
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+    $(document).delegate('.paid-amount','change',function(){
+        check_amount();
+    });
+
+    function check_amount(){
+        paid_amount = $('.paid-amount').val();
+        var paid_amount_float = parseFloat(paid_amount);
+        total_due = $('.due').html();
+        var total_due_float = parseFloat(total_due);
+        console.log(paid_amount_float);
+        console.log(total_due_float);
+
+        if (paid_amount_float>0) {
+            if (paid_amount_float >= total_due_float) {
+                $('.paid-amount').val(0);
+            }
+        } else {
+            $('.paid-amount').val(0);
+        }
+    }
+</script>

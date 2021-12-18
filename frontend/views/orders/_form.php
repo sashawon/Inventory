@@ -46,12 +46,13 @@ $this->registerJs($js);
                     <?php $paid_status='Unpaid'; ?>
                     <?= $form->field($model, 'order_no')->textInput(['value'=>$order_no, 'readonly'=> true])->label(false) ?>
                     <?= $form->field($model, 'status')->hiddenInput(['value'=>$paid_status, 'class' => 'form-control order_paid_status', 'readonly'=> true])->label(false) ?>
+                    <?= $form->field($model, 'created_at')->hiddenInput(['value' => date("F j, Y, g:i a")])->label(false) ?>
                 </td>
-                <?php if (!Yii::$app->user->isGuest && $userInfo->user_type=='customer') {?>
+                    <?php if (!Yii::$app->user->isGuest && $userInfo->user_type=='customer') {?>
                 <td>User Name: </td>
                 <td>
-                    <input type="text" id="orders-username" class="form-control"value="<?=$userInfo->username?>" readonly>
-                    <?= $form->field($model, 'user_id')->hiddenInput(['value'=>$userInfo->user_id, 'readonly'=> true])->label(false) ?>
+                    <input type="text" id="orders-username" class="form-control" value="<?=$userInfo->username?>" readonly>
+                    <?= $form->field($model, 'user_id')->hiddenInput(['value'=>$userInfo->user_id, 'class' => 'form-control orders-user_id', 'readonly'=> true])->label(false) ?>
                 </td>
             </tr>
             <tr>
@@ -68,6 +69,7 @@ $this->registerJs($js);
                                 ArrayHelper::map(User::find()->all(),'user_id','username'),
                                 [
                                     'prompt'=>'Select Item',
+                                    'class' => 'form-control orders-user_id'
                                 ]
                             )->label(false);
                         ?>
@@ -175,12 +177,20 @@ $this->registerJs($js);
                                 } else {
                                     echo $form->field($modelOrdersDetails, "[{$i}]total_price")->textInput(['type'=>'number', 'value'=>'0', 'class' => 'form-control product_total_price', 'readonly'=> true])->label(false);
                                 }
+
+
+                                if (! $modelOrdersDetails->isNewRecord) {
+                                    echo $form->field($modelOrdersDetails, "[{$i}]created_at")->hiddenInput(['value'=>$modelOrdersDetails->created_at])->label(false);
+                                } else {
+                                    echo $form->field($modelOrdersDetails, "[{$i}]created_at")->hiddenInput(['value' => date("F j, Y, g:i a")])->label(false);
+                                }
                             ?>
                         </td>
                         <td>
                             <button type="button" class="remove-item btn btn-danger btn-sm"><i class="fas fa-minus"></i></button>
                         </td>
                     </tr>
+
                 <?php endforeach; ?>
                 </tbody>
             </table>
@@ -197,9 +207,11 @@ $this->registerJs($js);
                     echo $form->field($model, 'total_price')->textInput(['maxlength' => true, 'value'=>'0', 'class' => 'form-control orders-total_price', 'readonly'=> true]);
                 }
             ?>
+
+            <?= $form->field($modelsInvoice, 'customer_id')->hiddenInput(['value'=>'0', 'class' => 'form-control invoice-user_id', 'readonly'=> true])->label(false) ?>
             <?= $form->field($modelsInvoice, 'paid_amount')->hiddenInput(['value'=>'0', 'readonly'=> true])->label(false) ?>
             <?= $form->field($modelsInvoice, 'invoice_no')->hiddenInput(['value'=>$invoice_no, 'readonly'=> true])->label(false) ?>
-            <?= $form->field($modelsInvoice, 'customer_id')->hiddenInput(['value'=>$userInfo->user_id, 'readonly'=> true])->label(false) ?>
+            <?= $form->field($modelsInvoice, 'created_at')->hiddenInput(['value' => date("F j, Y, g:i a")])->label(false) ?>
 
         </div>
     </div>
@@ -222,6 +234,11 @@ $this->registerJs($js);
 
     $(document).delegate('.remove-item','click',function(){
         total();
+    });
+
+    $(document).delegate('.orders-user_id','click',function(){
+        orders_user_id = $(this).val(),
+        invoice_user_id = $('.invoice-user_id').val(orders_user_id);
     });
     
     $(document).delegate('.product_id','change',function(){

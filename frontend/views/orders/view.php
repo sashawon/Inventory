@@ -29,13 +29,24 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-            'order_id',
+//            'order_id',
             'order_no',
-            'user_id',
+//            'user_id',
+
+            [
+                'label' => 'User Name',
+                'value' => function ($data){ return $data->user->username; },
+            ],
+
+            [
+                'label' => 'Phone No',
+                'value' => function ($data){ return $data->user->phone; },
+            ],
+
             'total_price',
             'status',
             'created_at',
-            'updated_at',
+//            'updated_at',
         ],
     ]) ?>
 

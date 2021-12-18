@@ -107,10 +107,10 @@ class InvoiceController extends Controller
 
 //        echo"<pre>"; var_dump($modelInvoiceDetails); die();
 
-        $modelOrders = OrdersDetails::find()
+        /*$modelOrders = OrdersDetails::find()
             ->with('orders', 'product')
             ->where(['order_id' => $id])
-            ->all();
+            ->all();*/
 
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {
@@ -124,7 +124,6 @@ class InvoiceController extends Controller
             'model' => $model,
             'modelInvoiceDetails' => $modelInvoiceDetails,
             'modelInvoiceTotal' => $modelInvoiceTotal,
-            'modelOrders' => $modelOrders,
             'invoice_no' => $invoice_no,
         ]);
     }
