@@ -164,7 +164,6 @@ class OrdersController extends Controller
 
         $userInfo = Yii::$app->user->identity;
         $order_no = rand(11111111111, 99999999999).date("dmy");
-        $invoice_no = rand(11111111111, 99999999999).date("dmy");
         $url = Url::toRoute('orders/productinfo');
         $urlproductpricecount = Url::toRoute('orders/productpricecount');
         // echo"<pre>"; print_r($userInfo); die();
@@ -174,8 +173,14 @@ class OrdersController extends Controller
             if ($model->load($this->request->post()) && $model->save()) {
 
                 $modelsInvoiceOrderId =  $modelsInvoice->order_id = $model->order_id;
+                $modelsInvoice->invoice_no = rand(11111111111, 99999999999).date("dmy");
+                $modelsInvoice->customer_id = $model->user_id;
+                $modelsInvoice->paid_amount = '0';
+                $modelsInvoice->comment = 'No Comment';
                 $modelsInvoice->payment_date = date("F j, Y, g:i a");
-                $modelsInvoice->load($this->request->post()) && $modelsInvoice->save(false);
+                $modelsInvoice->created_at = date("F j, Y, g:i a");
+//                $modelsInvoice->load($this->request->post());
+                $modelsInvoice->save(false);
 //                echo"<pre>"; var_dump($modelsInvoice); die();
 
 
@@ -238,7 +243,6 @@ class OrdersController extends Controller
             'url' => $url,
             'urlproductpricecount' => $urlproductpricecount,
             'modelsInvoice' => $modelsInvoice,
-            'invoice_no' => $invoice_no,
             'modelsOrdersDetails' => (empty($modelsOrdersDetails)) ? [new OrdersDetails] : $modelsOrdersDetails,
         ]);
     }
@@ -246,59 +250,82 @@ class OrdersController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-        // $modelsOrdersDetails = $model->orders_details;
-        // $modelsOrdersDetails = [new OrdersDetails];
         $modelsOrdersDetails = OrdersDetails::find()->where(['order_id' => $id])->all();
-        $userInfo = Yii::$app->user->identity;
-        $order_no = $model->order_no;
-        $url = Url::toRoute('orders/productinfo');
-        $urlproductpricecount = Url::toRoute('orders/productpricecount');
-        // echo"<pre>"; print_r($modelsOrdersDetails); die();
+        $modelsInvoice = new Invoice();
 
-        if ($model->load(Yii::$app->request->post())) {
+        $modelInvoiceTotal = Invoice::find()
+                            ->where(['order_id' => $id])
+                            ->sum('paid_amount');
 
-            $oldIDs = ArrayHelper::map($modelsOrdersDetails, 'orders_details_id', 'orders_details_id');
-            $modelsOrdersDetails = Model::createMultiple(OrdersDetails::classname(), $modelsOrdersDetails);
-            Model::loadMultiple($modelsOrdersDetails, Yii::$app->request->post());
-            $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelsOrdersDetails, 'orders_details_id', 'orders_details_id')));
+        if ($modelInvoiceTotal>0) {
+            Yii::$app->session->setFlash('error', "Not able to update this order, Because payment has done!");
+            return $this->redirect(Url::toRoute('orders/index'));
+        } else {
+            $userInfo = Yii::$app->user->identity;
+            $order_no = $model->order_no;
+            $url = Url::toRoute('orders/productinfo');
+            $urlproductpricecount = Url::toRoute('orders/productpricecount');
+            // echo"<pre>"; print_r($modelsOrdersDetails); die();
 
-            // validate all models
-            $valid = $model->validate();
-            $valid = Model::validateMultiple($modelsOrdersDetails) && $valid;
+            if ($model->load(Yii::$app->request->post())) {
 
-            if ($valid) {
-                $transaction = \Yii::$app->db->beginTransaction();
-                try {
-                    if ($flag = $model->save(false)) {
-                        if (!empty($deletedIDs)) {
-                            OrdersDetails::deleteAll(['orders_details_id' => $deletedIDs]);
-                        }
-                        foreach ($modelsOrdersDetails as $modelOrdersDetails) {
-                            $modelOrdersDetails->order_id = $model->order_id;
-                            if (! ($flag = $modelOrdersDetails->save(false))) {
-                                $transaction->rollBack();
-                                break;
+                $modelsInvoiceOrderId =  $modelsInvoice->order_id = $model->order_id;
+                $modelsInvoice->invoice_no = rand(11111111111, 99999999999).date("dmy");
+                $modelsInvoice->customer_id = $model->user_id;
+                $modelsInvoice->paid_amount = '0';
+                $modelsInvoice->comment = 'No Comment';
+                $modelsInvoice->payment_date = date("F j, Y, g:i a");
+                $modelsInvoice->created_at = date("F j, Y, g:i a");
+//                $modelsInvoice->load($this->request->post());
+                $modelsInvoice->save(false);
+//                echo"<pre>"; var_dump($modelsInvoice); die();
+
+                $oldIDs = ArrayHelper::map($modelsOrdersDetails, 'orders_details_id', 'orders_details_id');
+                $modelsOrdersDetails = Model::createMultiple(OrdersDetails::classname(), $modelsOrdersDetails);
+                Model::loadMultiple($modelsOrdersDetails, Yii::$app->request->post());
+                $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelsOrdersDetails, 'orders_details_id', 'orders_details_id')));
+
+                // validate all models
+                $valid = $model->validate();
+                $valid = Model::validateMultiple($modelsOrdersDetails) && $valid;
+
+                if ($valid) {
+                    $transaction = \Yii::$app->db->beginTransaction();
+                    try {
+                        if ($flag = $model->save(false)) {
+                            if (!empty($deletedIDs)) {
+                                OrdersDetails::deleteAll(['orders_details_id' => $deletedIDs]);
+                            }
+                            foreach ($modelsOrdersDetails as $modelOrdersDetails) {
+                                $modelOrdersDetails->order_id = $model->order_id;
+                                if (! ($flag = $modelOrdersDetails->save(false))) {
+                                    $transaction->rollBack();
+                                    break;
+                                }
                             }
                         }
+                        if ($flag) {
+                            $transaction->commit();
+
+                            $currentInvoice = Invoice::find()->where(['order_id' => $modelsInvoiceOrderId])->orderBy(['invoice_id' => SORT_DESC])->one();
+                            return $this->redirect(['invoice/view', 'id' => $currentInvoice->invoice_id]);
+                        }
+                    } catch (Exception $e) {
+                        $transaction->rollBack();
                     }
-                    if ($flag) {
-                        $transaction->commit();
-                        return $this->redirect(['index']);
-                    }
-                } catch (Exception $e) {
-                    $transaction->rollBack();
                 }
             }
+
+            return $this->render('update', [
+                'model' => $model,
+                'userInfo' => $userInfo,
+                'order_no' => $order_no,
+                'url' => $url,
+                'urlproductpricecount' => $urlproductpricecount,
+                'modelsOrdersDetails' => (empty($modelsOrdersDetails)) ? [new OrdersDetails] : $modelsOrdersDetails
+            ]);
         }
 
-        return $this->render('update', [
-            'model' => $model,
-            'userInfo' => $userInfo,
-            'order_no' => $order_no,
-            'url' => $url,
-            'urlproductpricecount' => $urlproductpricecount,
-            'modelsOrdersDetails' => (empty($modelsOrdersDetails)) ? [new OrdersDetails] : $modelsOrdersDetails
-        ]);
     }
 
     public function actionDelete($id)

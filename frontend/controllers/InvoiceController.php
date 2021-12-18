@@ -113,7 +113,33 @@ class InvoiceController extends Controller
             ->all();*/
 
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
+            if ($this->request->post()['Invoice']['comment'] == ''){
+                $loadData = $model->load($this->request->post());
+                $model->comment = 'No comment';
+            } else {
+                $loadData = $model->load($this->request->post());
+            }
+
+            if ($loadData && $model->save()) {
+                $modelInvoiceTotal = Invoice::find()
+                                    ->where(['order_id' => $id])
+                                    ->sum('paid_amount');
+
+                $modelOrdersTotal = Orders::find()
+                                    ->select('total_price')
+                                    ->where(['order_id' => $id])
+                                    ->one();
+
+                $due = $modelOrdersTotal['total_price'] - $modelInvoiceTotal;
+
+                if ($due == 0) {
+                    $modelOrdersStatus = Orders::find()
+                        ->where(['order_id' => $id])
+                        ->one();
+                    $modelOrdersStatus->status = 'Paid';
+                    $modelOrdersStatus->save();
+                }
+
                 return $this->redirect(['view', 'id' => $model->invoice_id]);
             }
         } else {

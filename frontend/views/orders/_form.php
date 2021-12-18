@@ -207,12 +207,6 @@ $this->registerJs($js);
                     echo $form->field($model, 'total_price')->textInput(['maxlength' => true, 'value'=>'0', 'class' => 'form-control orders-total_price', 'readonly'=> true]);
                 }
             ?>
-
-            <?= $form->field($modelsInvoice, 'customer_id')->hiddenInput(['value'=>'0', 'class' => 'form-control invoice-user_id', 'readonly'=> true])->label(false) ?>
-            <?= $form->field($modelsInvoice, 'paid_amount')->hiddenInput(['value'=>'0', 'readonly'=> true])->label(false) ?>
-            <?= $form->field($modelsInvoice, 'invoice_no')->hiddenInput(['value'=>$invoice_no, 'readonly'=> true])->label(false) ?>
-            <?= $form->field($modelsInvoice, 'created_at')->hiddenInput(['value' => date("F j, Y, g:i a")])->label(false) ?>
-
         </div>
     </div>
 
@@ -236,11 +230,6 @@ $this->registerJs($js);
         total();
     });
 
-    $(document).delegate('.orders-user_id','click',function(){
-        orders_user_id = $(this).val(),
-        invoice_user_id = $('.invoice-user_id').val(orders_user_id);
-    });
-    
     $(document).delegate('.product_id','change',function(){
         product_id = $(this).val(),
         parent = $(this).parents('.p_row').first(),

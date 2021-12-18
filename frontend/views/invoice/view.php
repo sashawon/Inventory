@@ -118,15 +118,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <tbody>";
                 echo '
                         <tr>
-                            <td>';
-
-                if ($modelInvoiceDetails[0]->comment == '') {
-                    echo 'No Comment Yet';
-                } else {
-                    echo $modelInvoiceDetails[0]->comment;
-                }
-
-                echo '</td>
+                            <td>'.$modelInvoiceDetails[0]->comment.'</td>
                         </tr>
                     ';
                 echo "</tbody>
@@ -138,14 +130,23 @@ $this->params['breadcrumbs'][] = $this->title;
                 echo "<table class='table table-striped table-light'>
                             <p><b>Invoice Total</b></p><hr>
                             <tbody>";
+                $total_due = $modelInvoiceDetails[0]->orders['total_price']-$modelInvoiceTotal;
                 echo '
                         <tr>
                             <td>Total Price</td>
                             <td>'.$modelInvoiceDetails[0]->orders['total_price'].'</td>
                         </tr>
                         <tr>
+                            <td>Paid Amount</td>
+                            <td>'.$modelInvoiceDetails[0]->paid_amount.'</td>
+                        </tr>
+                        <tr>
                             <td>Total Paid</td>
                             <td>'.$modelInvoiceTotal.'</td>
+                        </tr>
+                        <tr>
+                            <td>Total Due</td>
+                            <td>'.$total_due.'</td>
                         </tr>
                     ';
                 echo "</tbody>

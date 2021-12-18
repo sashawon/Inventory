@@ -109,11 +109,11 @@ use yii\jui\DatePicker;
         var paid_amount_float = parseFloat(paid_amount);
         total_due = $('.due').html();
         var total_due_float = parseFloat(total_due);
-        console.log(paid_amount_float);
-        console.log(total_due_float);
+        /*console.log(paid_amount_float);
+        console.log(total_due_float);*/
 
         if (paid_amount_float>0) {
-            if (paid_amount_float >= total_due_float) {
+            if (paid_amount_float > total_due_float) {
                 $('.paid-amount').val(0);
             }
         } else {

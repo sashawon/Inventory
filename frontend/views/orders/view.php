@@ -43,6 +43,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function ($data){ return $data->user->phone; },
             ],
 
+            [
+                'label' => 'Address',
+                'value' => function ($data){ return $data->user->address; },
+            ],
+
             'total_price',
             'status',
             'created_at',
