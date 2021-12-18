@@ -39,6 +39,7 @@ AppAsset::register($this);
         ['label' => 'Home', 'url' => ['/site/index']],
         ['label' => 'Products', 'url' => ['/product/index']],
         ['label' => 'Orders', 'url' => ['/orders/index']],
+        ['label' => 'Invoice', 'url' => ['/invoice/index']],
     ];
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => 'Signup', 'url' => ['/site/signup']];
