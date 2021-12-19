@@ -24,6 +24,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'method' => 'post',
             ],
         ]) ?>
+        <?= Html::a('Print', ['print', 'id' => $model->order_id], ['class' => 'btn btn-info']) ?>
+        <?= Html::a('Download', ['download', 'id' => $model->order_id], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?= DetailView::widget([
@@ -50,7 +52,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'total_price',
             'status',
-            'created_at',
+//            'created_at',
 //            'updated_at',
         ],
     ]) ?>

@@ -15,7 +15,11 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Create Product', ['create'], ['class' => 'btn btn-success']) ?>
+        <?php
+        if (!Yii::$app->user->isGuest && Yii::$app->user->identity->user_type=='admin'){
+            echo Html::a('Create Product', ['create'], ['class' => 'btn btn-success']);
+        }
+        ?>
     </p>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
@@ -26,17 +30,24 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
-            'product_id',
+            //'product_id',
             'name',
             'photo',
             'price',
             'quantity',
             //'details:ntext',
+            [
+                'attribute' => 'status',
+                'visible' => !Yii::$app->user->isGuest && Yii::$app->user->identity->user_type=='admin',
+            ],
             //'status',
             //'created_at',
             //'updated_at',
 
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'visible' => !Yii::$app->user->isGuest && Yii::$app->user->identity->user_type=='admin',
+            ],
         ],
     ]); ?>
 

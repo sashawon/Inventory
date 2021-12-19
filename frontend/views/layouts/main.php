@@ -38,14 +38,14 @@ AppAsset::register($this);
     $menuItems = [
         ['label' => 'Home', 'url' => ['/site/index']],
         ['label' => 'Products', 'url' => ['/product/index']],
-        ['label' => 'Orders', 'url' => ['/orders/index']],
-        ['label' => 'Invoice', 'url' => ['/invoice/index']],
     ];
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => 'Signup', 'url' => ['/site/signup']];
         $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
     } else {
-        $menuItems[] = ['label' => 'My Orders', 'url' => ['/orders/order_info', 'id' => Yii::$app->user->identity->user_id]];
+        $menuItems[] = ['label' => 'Orders', 'url' => ['/orders/index']];
+        $menuItems[] = ['label' => 'Invoice', 'url' => ['/invoice/index']];
+//        $menuItems[] = ['label' => 'My Orders', 'url' => ['/orders/order_info', 'id' => Yii::$app->user->identity->user_id]];
         $menuItems[] = '<li>'
             . Html::beginForm(['/site/logout'], 'post', ['class' => 'form-inline'])
             . Html::submitButton(

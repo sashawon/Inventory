@@ -2,6 +2,7 @@
 
 namespace frontend\models;
 
+use yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use frontend\models\Invoice;
@@ -40,7 +41,11 @@ class InvoiceSearch extends Invoice
      */
     public function search($params)
     {
-        $query = Invoice::find();
+        if (!Yii::$app->user->isGuest && Yii::$app->user->identity->user_type=='customer') {
+            $query = Invoice::find()->where(['customer_id' => Yii::$app->user->identity->user_id]);
+        } else {
+            $query = Invoice::find();
+        }
 
         // add conditions that should always apply here
 

@@ -50,6 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         ['class' => 'btn btn-sm btn-success']
                     );
                 },
+                'visible' => !Yii::$app->user->isGuest && Yii::$app->user->identity->user_type=='admin',
             ],
 
             ['class' => 'yii\grid\ActionColumn'],

@@ -66,7 +66,7 @@ $this->registerJs($js);
                 <td>
                     <!-- User list for admin panel -->
                     <?= $form->field($model, "user_id")->dropdownList(
-                                ArrayHelper::map(User::find()->all(),'user_id','username'),
+                                ArrayHelper::map(User::find()->where(['status' => 10])->all(),'user_id','username'),
                                 [
                                     'prompt'=>'Select Item',
                                     'class' => 'form-control orders-user_id'
@@ -108,10 +108,10 @@ $this->registerJs($js);
                 <thead>
                     <tr>
                         <th>Product Name</th>
-                        <th>Total Quantity</th>
-                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Unit Price</th>
                         <th>Quantity</th>
-                        <th>Total Price</th>
+                        <th>Price</th>
                         <th>Remove</th>
                     </tr>
                 </thead>
@@ -272,7 +272,42 @@ $this->registerJs($js);
             type: 'get',
             data: {id:product_id,
                     quantity:quantity,
-                    product_quantity:product_quantity, 
+                    product_quantity:product_quantity,
+                    product_total_price:product_total_price
+                },
+            success: function(response) {
+                // console.log(response);
+                $(child_product_total_price).val(response.currentItemTotalPrice);
+                if(response.qty != null ){
+                    $(child_product_error).html(response.selectData);
+                    $(child_product_quantity_error).val(response.qty);
+                } else {
+                    $(child_product_error).html('');
+                };
+                total();
+            },
+            error: function() {
+                console.log('error');
+            }
+        });
+    });
+
+    $(document).delegate('.quantity','blur',function(){
+        quantity = $(this).val(),
+        product_quantity = $('.product-quantity').val();
+        product_total_price = $('.product_total_price').val();
+        parent = $(this).parents('.p_row').first(),
+        product_id = parent.find('.product_id').val(),
+        child_product_total_price = parent.find('.product_total_price').first(),
+        child_product_error = parent.find('.product_name_error').first(),
+        child_product_quantity_error = parent.find('.quantity').first(),
+
+        $.ajax({
+            url: '<?= $urlproductpricecount ?>',
+            type: 'get',
+            data: {id:product_id,
+                    quantity:quantity,
+                    product_quantity:product_quantity,
                     product_total_price:product_total_price
                 },
             success: function(response) {

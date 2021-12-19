@@ -2,6 +2,7 @@
 
 namespace frontend\models;
 
+use yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use frontend\models\Product;
@@ -40,7 +41,11 @@ class ProductSearch extends Product
      */
     public function search($params)
     {
-        $query = Product::find();
+        if (!Yii::$app->user->isGuest && Yii::$app->user->identity->user_type=='customer') {
+            $query = Product::find()->where(['status' => 1]);
+        } else {
+            $query = Product::find();
+        }
 
         // add conditions that should always apply here
 

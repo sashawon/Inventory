@@ -2,9 +2,10 @@
 
 namespace frontend\models;
 
+use frontend\models\Orders;
+use yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use frontend\models\Orders;
 
 /**
  * OrdersSearch represents the model behind the search form of `frontend\models\Orders`.
@@ -40,7 +41,11 @@ class OrdersSearch extends Orders
      */
     public function search($params)
     {
-        $query = Orders::find();
+        if (!Yii::$app->user->isGuest && Yii::$app->user->identity->user_type=='customer') {
+            $query = Orders::find()->where(['user_id' => Yii::$app->user->identity->user_id]);
+        } else {
+            $query = Orders::find();
+        }
 
         // add conditions that should always apply here
 

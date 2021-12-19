@@ -88,8 +88,8 @@ class OrdersController extends Controller
 
                     } else {
 
-                        $qty = $currentItem->quantity;
-                        $selectData = "Selected Product quantity Should be Less than or Equal to Product Quantity!";
+                        $qty = 0;
+                        $selectData = "Quantity can not be grater than Stock!";
 
                         $result = [
                                 'qty' => $qty,
@@ -113,7 +113,7 @@ class OrdersController extends Controller
             } else {
 
                 $qty = 0;
-                $selectData = "Select Product More Than 0!";
+                $selectData = "Quantity Should be more Than 0!";
 
                 $result = [
                         'qty' => $qty,
@@ -335,16 +335,28 @@ class OrdersController extends Controller
 
         $model = $this->findModel($id);
         $modelsOrdersDetails = OrdersDetails::find()->where(['order_id' => $id])->all();
+        $modelsInvoiceDetails = Invoice::find()->where(['order_id' => $id])->all();
+        $modelInvoiceTotal = Invoice::find()
+                            ->where(['order_id' => $id])
+                            ->sum('paid_amount');
         // echo"<pre>"; print_r($modelsOrdersDetails[0]); die();
 
+        if ($modelInvoiceTotal>0) {
+            Yii::$app->session->setFlash('error', "Not able to delete this order, Because payment has done!");
+            return $this->redirect(Url::toRoute('orders/index'));
+        } else {
+            $oldIDs = ArrayHelper::map($modelsOrdersDetails, 'orders_details_id', 'orders_details_id');
+            $oldIDsInvoice = ArrayHelper::map($modelsInvoiceDetails, 'invoice_id', 'invoice_id');
+            if (!empty($oldIDs)) {
+                OrdersDetails::deleteAll(['orders_details_id' => $oldIDs]);
+                if (!empty($oldIDsInvoice)) {
+                    Invoice::deleteAll(['invoice_id' => $oldIDsInvoice]);
+                }
+            }
 
-        $oldIDs = ArrayHelper::map($modelsOrdersDetails, 'orders_details_id', 'orders_details_id');
-        if (!empty($oldIDs)) {
-            OrdersDetails::deleteAll(['orders_details_id' => $oldIDs]);
-        }
-
-        if ($model->delete()) {
-            Yii::$app->session->setFlash('success', 'Record deleted successfully.');
+            if ($model->delete()) {
+                Yii::$app->session->setFlash('success', 'Record deleted successfully.');
+            }
         }
 
         return $this->redirect(['index']);
