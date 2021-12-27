@@ -24,13 +24,22 @@ $this->params['breadcrumbs'][] = $this->title;
 
             //'invoice_id',
             'invoice_no',
-            'order_id',
+            //'order_id',
+            [
+                'label' => 'Order No',
+                'value' => function ($data){ return $data->orders->order_no; },
+            ],
             //'customer_id',
             [
                 'label' => 'User Name',
                 'value' => function ($data){ return $data->user->username; },
             ],
-            'paid_amount',
+            //'paid_amount',
+            [
+                'label' => 'Paid Amount',
+                'attribute' => 'paid_amount',
+                'value' => function ($data){ return $data->paid_amount." ৳"; },
+            ],
             'comment:ntext',
             'payment_date',
             //'created_at',

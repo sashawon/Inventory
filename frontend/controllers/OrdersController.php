@@ -16,6 +16,7 @@ use frontend\models\Product;
 use frontend\models\Model;
 use yii\web\Response;
 use yii\helpers\Url;
+use Mpdf\Mpdf;
 
 /**
  * OrdersController implements the CRUD actions for Orders model.
@@ -160,7 +161,6 @@ class OrdersController extends Controller
     {
         $model = new Orders();
         $modelsOrdersDetails = [new OrdersDetails];
-        $modelsInvoice = new Invoice();
 
         $userInfo = Yii::$app->user->identity;
         $order_no = rand(11111111111, 99999999999).date("dmy");
@@ -169,21 +169,9 @@ class OrdersController extends Controller
         // echo"<pre>"; print_r($userInfo); die();
 
         if ($this->request->isPost) {
+            $model->total_paid = '0';
             // echo"<pre>"; var_dump($this->request->post()); die();
             if ($model->load($this->request->post()) && $model->save()) {
-
-                $modelsInvoiceOrderId =  $modelsInvoice->order_id = $model->order_id;
-                $modelsInvoice->invoice_no = rand(11111111111, 99999999999).date("dmy");
-                $modelsInvoice->customer_id = $model->user_id;
-                $modelsInvoice->paid_amount = '0';
-                $modelsInvoice->comment = 'No Comment';
-                $modelsInvoice->payment_date = date("F j, Y, g:i a");
-                $modelsInvoice->created_at = date("F j, Y, g:i a");
-//                $modelsInvoice->load($this->request->post());
-                $modelsInvoice->save(false);
-//                echo"<pre>"; var_dump($modelsInvoice); die();
-
-
                 $modelsOrdersDetails = Model::createMultiple(OrdersDetails::classname());
                 Model::loadMultiple($modelsOrdersDetails, Yii::$app->request->post());
 
@@ -218,13 +206,7 @@ class OrdersController extends Controller
                                 $product->save();
                             }
 
-                            $currentInvoice = Invoice::find()->where(['order_id' => $modelsInvoiceOrderId])->orderBy(['invoice_id' => SORT_DESC])->one();
-
-//                            echo "<pre>";
-//                            var_dump($currentInvoice);
-//                            die();
-
-                            return $this->redirect(['invoice/view', 'id' => $currentInvoice->invoice_id]);
+                            return $this->redirect(['view', 'id' => $model->order_id]);
                         }
                     } catch (Exception $e) {
                         $transaction->rollBack();
@@ -242,7 +224,6 @@ class OrdersController extends Controller
             'order_no' => $order_no,
             'url' => $url,
             'urlproductpricecount' => $urlproductpricecount,
-            'modelsInvoice' => $modelsInvoice,
             'modelsOrdersDetails' => (empty($modelsOrdersDetails)) ? [new OrdersDetails] : $modelsOrdersDetails,
         ]);
     }
@@ -251,14 +232,9 @@ class OrdersController extends Controller
     {
         $model = $this->findModel($id);
         $modelsOrdersDetails = OrdersDetails::find()->where(['order_id' => $id])->all();
-        $modelsInvoice = new Invoice();
 
-        $modelInvoiceTotal = Invoice::find()
-                            ->where(['order_id' => $id])
-                            ->sum('paid_amount');
-
-        if ($modelInvoiceTotal>0) {
-            Yii::$app->session->setFlash('error', "Not able to update this order, Because payment has done!");
+        if ($model->total_paid>0) {
+            Yii::$app->session->setFlash('error', "Not able to update, Because payment has done!");
             return $this->redirect(Url::toRoute('orders/index'));
         } else {
             $userInfo = Yii::$app->user->identity;
@@ -268,18 +244,6 @@ class OrdersController extends Controller
             // echo"<pre>"; print_r($modelsOrdersDetails); die();
 
             if ($model->load(Yii::$app->request->post())) {
-
-                $modelsInvoiceOrderId =  $modelsInvoice->order_id = $model->order_id;
-                $modelsInvoice->invoice_no = rand(11111111111, 99999999999).date("dmy");
-                $modelsInvoice->customer_id = $model->user_id;
-                $modelsInvoice->paid_amount = '0';
-                $modelsInvoice->comment = 'No Comment';
-                $modelsInvoice->payment_date = date("F j, Y, g:i a");
-                $modelsInvoice->created_at = date("F j, Y, g:i a");
-//                $modelsInvoice->load($this->request->post());
-                $modelsInvoice->save(false);
-//                echo"<pre>"; var_dump($modelsInvoice); die();
-
                 $oldIDs = ArrayHelper::map($modelsOrdersDetails, 'orders_details_id', 'orders_details_id');
                 $modelsOrdersDetails = Model::createMultiple(OrdersDetails::classname(), $modelsOrdersDetails);
                 Model::loadMultiple($modelsOrdersDetails, Yii::$app->request->post());
@@ -307,8 +271,7 @@ class OrdersController extends Controller
                         if ($flag) {
                             $transaction->commit();
 
-                            $currentInvoice = Invoice::find()->where(['order_id' => $modelsInvoiceOrderId])->orderBy(['invoice_id' => SORT_DESC])->one();
-                            return $this->redirect(['invoice/view', 'id' => $currentInvoice->invoice_id]);
+                            return $this->redirect(['view', 'id' => $model->order_id]);
                         }
                     } catch (Exception $e) {
                         $transaction->rollBack();
@@ -336,22 +299,17 @@ class OrdersController extends Controller
         $model = $this->findModel($id);
         $modelsOrdersDetails = OrdersDetails::find()->where(['order_id' => $id])->all();
         $modelsInvoiceDetails = Invoice::find()->where(['order_id' => $id])->all();
-        $modelInvoiceTotal = Invoice::find()
-                            ->where(['order_id' => $id])
-                            ->sum('paid_amount');
+
         // echo"<pre>"; print_r($modelsOrdersDetails[0]); die();
 
-        if ($modelInvoiceTotal>0) {
-            Yii::$app->session->setFlash('error', "Not able to delete this order, Because payment has done!");
+        if ($model->total_paid > 0) {
+            Yii::$app->session->setFlash('error', "Not able to delete, Because payment has done!");
             return $this->redirect(Url::toRoute('orders/index'));
         } else {
             $oldIDs = ArrayHelper::map($modelsOrdersDetails, 'orders_details_id', 'orders_details_id');
-            $oldIDsInvoice = ArrayHelper::map($modelsInvoiceDetails, 'invoice_id', 'invoice_id');
+
             if (!empty($oldIDs)) {
                 OrdersDetails::deleteAll(['orders_details_id' => $oldIDs]);
-                if (!empty($oldIDsInvoice)) {
-                    Invoice::deleteAll(['invoice_id' => $oldIDsInvoice]);
-                }
             }
 
             if ($model->delete()) {
@@ -360,6 +318,30 @@ class OrdersController extends Controller
         }
 
         return $this->redirect(['index']);
+    }
+
+    public function actionDownload($id)
+    {
+        $modelsOrdersDetails = OrdersDetails::find()
+            ->joinWith('product')
+            ->where(['order_id' => $id])
+            ->all();
+
+        $pdf_content = $this->renderPartial('view_pdf', [
+            'model' => $this->findModel($id),
+            'modelsOrdersDetails' => $modelsOrdersDetails,
+        ]);
+
+        try {
+            $mpdf = new Mpdf();
+            $mpdf->simpleTables = true;
+            $mpdf->WriteHTML($pdf_content);
+            $mpdf->Output();
+            exit();
+        } catch (\Mpdf\MpdfException $e) {
+            echo $e->getMessage();
+        }
+
     }
 
     public function actionOrder_info($id='')
@@ -440,4 +422,5 @@ class OrdersController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+
 }

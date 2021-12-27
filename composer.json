@@ -21,7 +21,9 @@
         "mdmsoft/yii2-admin": "~2.0",
         "yii2mod/yii2-rbac": "*",
         "wbraganca/yii2-dynamicform": "*",
-        "antkaz/yii2-ajax": "^2.0"
+        "antkaz/yii2-ajax": "^2.0",
+        "mpdf/mpdf": "^8.0",
+        "dixonstarter/yii2-pdfprint": "*"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

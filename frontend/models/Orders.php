@@ -40,7 +40,7 @@ class Orders extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'total_price'], 'integer'],
+            [['user_id', 'total_price', 'total_paid'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['order_no', 'status'], 'string', 'max' => 255],
         ];
@@ -56,6 +56,7 @@ class Orders extends \yii\db\ActiveRecord
             'order_no' => 'Order No',
             'user_id' => 'User ID',
             'total_price' => 'Total Price',
+            'total_paid' => 'Paid Amount',
             'status' => 'Status',
         ];
     }

@@ -32,7 +32,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'product_id',
             'name',
             'photo',
-            'price',
+//            'price',
+            [
+                'label' => 'Price',
+                'attribute' => 'price',
+                'value' => function ($data){ return $data->price." ৳"; },
+            ],
             'quantity',
             'details:ntext',
             'status',

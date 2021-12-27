@@ -19,7 +19,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'order_no' => $order_no,
         'url' => $url,
         'urlproductpricecount' => $urlproductpricecount,
-        'modelsInvoice' => $modelsInvoice,
         'modelsOrdersDetails' => $modelsOrdersDetails,
     ]) ?>
 

@@ -18,7 +18,7 @@ use yii\jui\DatePicker;
             <div class="col-6">
                 <?php
 
-                $due = $modelInvoiceDetails[0]->orders['total_price'] - $modelInvoiceTotal;
+                $due = $modelOrders[0]->total_price - $modelOrders[0]->total_paid;
 
                 echo "<table class='table table-striped table-light'>
                             <p><b>Order Information</b></p><hr>
@@ -26,19 +26,19 @@ use yii\jui\DatePicker;
                 echo '
                             <tr>
                                 <td>Name</td>
-                                <td>'.$modelInvoiceDetails[0]->user['username'].'</td>
+                                <td>'.$modelOrders[0]->user['username'].'</td>
                             </tr>
                             <tr>
                                 <td>Phone</td>
-                                <td>'.$modelInvoiceDetails[0]->user['phone'].'</td>
+                                <td>'.$modelOrders[0]->user['phone'].'</td>
                             </tr>
                             <tr>
                                 <td>Order No</td>
-                                <td>'.$modelInvoiceDetails[0]->orders['order_no'].'</td>
+                                <td>'.$modelOrders[0]->order_no.'</td>
                             </tr>
                             <tr>
                                 <td>Order Date</td>
-                                <td>'.$modelInvoiceDetails[0]->orders['created_at'].'</td>
+                                <td>'.$modelOrders[0]->created_at.'</td>
                             </tr>
                             <tr class="bg-light">
                                 <td>Comment</td>
@@ -62,7 +62,7 @@ use yii\jui\DatePicker;
                         </tr>
                         <tr>
                             <td>Total Price</td>
-                            <td>'.$modelInvoiceDetails[0]->orders['total_price'].'</td>
+                            <td>'.$modelOrders[0]->total_price.'</td>
                         </tr>
                         <tr>
                             <td>Due</td>
@@ -83,9 +83,9 @@ use yii\jui\DatePicker;
 
     <?= $form->field($model, 'invoice_no')->hiddenInput(['value' => $invoice_no, 'readonly'=> true])->label(false) ?>
 
-    <?= $form->field($model, 'order_id')->hiddenInput(['value' => $modelInvoiceDetails[0]->orders['order_id']])->label(false) ?>
+    <?= $form->field($model, 'order_id')->hiddenInput(['value' => $modelOrders[0]->order_id])->label(false) ?>
 
-    <?= $form->field($model, 'customer_id')->hiddenInput(['value' => $modelInvoiceDetails[0]->orders['user_id']])->label(false) ?>
+    <?= $form->field($model, 'customer_id')->hiddenInput(['value' => $modelOrders[0]->user_id])->label(false) ?>
 
     <?= $form->field($model, 'created_at')->hiddenInput(['value' => date("F j, Y, g:i a")])->label(false) ?>
 

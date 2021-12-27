@@ -59,29 +59,21 @@ class InvoiceController extends Controller
     {
 //        $model = $this->findModel($id);
 
-        $modelInvoiceDetails = Invoice::find()
-                               ->with('orders', 'user')
-                               ->where(['invoice_id' => $id])
-                               ->all();
-
+        $modelInvoiceDetails = Invoice::findAll(['invoice_id' => $id]);
 
         $InvoiceOrderId = $modelInvoiceDetails[0]['order_id'];
 
-        $modelInvoiceTotal = Invoice::find()
+        $modelOrders = Orders::findAll(['order_id' => $InvoiceOrderId]);
+
+        $modelOrdersDetails = OrdersDetails::find()
+            ->with('orders', 'product')
             ->where(['order_id' => $InvoiceOrderId])
-            ->sum('paid_amount');
-
-//        echo"<pre>"; var_dump($modelInvoiceTotal); die();
-
-        $modelOrders = OrdersDetails::find()
-                        ->with('orders', 'product')
-                        ->where(['order_id' => $InvoiceOrderId])
-                        ->all();
+            ->all();
 
         return $this->render('view', [
             'modelInvoiceDetails' => $modelInvoiceDetails,
             'modelOrders' => $modelOrders,
-            'modelInvoiceTotal' => $modelInvoiceTotal,
+            'modelOrdersDetails' => $modelOrdersDetails,
         ]);
     }
 
@@ -94,18 +86,9 @@ class InvoiceController extends Controller
     {
         $model = new Invoice();
 
+        $modelOrders = Orders::findAll(['order_id' => $id]);
+
         $invoice_no = rand(11111111111, 99999999999).date("dmy");
-
-        $modelInvoiceDetails = Invoice::find()
-            ->with('orders', 'user')
-            ->where(['order_id' => $id])
-            ->all();
-
-        $modelInvoiceTotal = Invoice::find()
-            ->where(['order_id' => $id])
-            ->sum('paid_amount');
-
-//        echo"<pre>"; var_dump($modelInvoiceDetails); die();
 
         /*$modelOrders = OrdersDetails::find()
             ->with('orders', 'product')
@@ -126,11 +109,13 @@ class InvoiceController extends Controller
                                     ->sum('paid_amount');
 
                 $modelOrdersTotal = Orders::find()
-                                    ->select('total_price')
                                     ->where(['order_id' => $id])
                                     ->one();
 
-                $due = $modelOrdersTotal['total_price'] - $modelInvoiceTotal;
+                $modelOrdersTotal->total_paid = $modelInvoiceTotal;
+                $modelOrdersTotal->save();
+
+                $due = $modelOrdersTotal->total_price - $modelOrdersTotal->total_paid;
 
                 if ($due == 0) {
                     $modelOrdersStatus = Orders::find()
@@ -148,8 +133,7 @@ class InvoiceController extends Controller
 
         return $this->render('create', [
             'model' => $model,
-            'modelInvoiceDetails' => $modelInvoiceDetails,
-            'modelInvoiceTotal' => $modelInvoiceTotal,
+            'modelOrders' => $modelOrders,
             'invoice_no' => $invoice_no,
         ]);
     }

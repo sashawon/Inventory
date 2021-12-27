@@ -18,7 +18,7 @@ class OrdersSearch extends Orders
     public function rules()
     {
         return [
-            [['order_id', 'user_id', 'total_price', 'status'], 'integer'],
+            [['order_id', 'user_id', 'total_price', 'total_paid', 'status'], 'integer'],
             [['order_no', 'created_at', 'updated_at'], 'safe'],
         ];
     }
@@ -66,6 +66,7 @@ class OrdersSearch extends Orders
             'order_id' => $this->order_id,
             'user_id' => $this->user_id,
             'total_price' => $this->total_price,
+            'total_paid' => $this->total_paid,
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

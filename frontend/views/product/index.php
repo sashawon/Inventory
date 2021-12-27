@@ -33,7 +33,12 @@ $this->params['breadcrumbs'][] = $this->title;
             //'product_id',
             'name',
             'photo',
-            'price',
+//            'price',
+            [
+                'label' => 'Price',
+                'attribute' => 'price',
+                'value' => function ($data){ return $data->price." ৳"; },
+            ],
             'quantity',
             //'details:ntext',
             [
@@ -46,6 +51,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'class' => 'yii\grid\ActionColumn',
+                'header' => 'Action',
                 'visible' => !Yii::$app->user->isGuest && Yii::$app->user->identity->user_type=='admin',
             ],
         ],

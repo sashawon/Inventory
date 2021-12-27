@@ -17,8 +17,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Print', ['#'], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Download', ['#'], ['class' => 'btn btn-danger']) ?>
+        <?= Html::a('Print', ['print', 'id' => $modelInvoiceDetails[0]->invoice_id], ['class' => 'btn btn-info']) ?>
+        <?= Html::a('Download', ['download', 'id' => $modelInvoiceDetails[0]->invoice_id], ['class' => 'btn btn-success']) ?>
     </p>
 
 
@@ -92,18 +92,20 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <tr>
                                     <td>SL.</td>
                                     <td>Product Name</td>
+                                    <td>Unit Price</td>
                                     <td>Quantity</td>
                                     <td>Price</td>
                                 </tr>
                             </thead>
                             <tbody>";
-                foreach($modelOrders as $modelOrder){
+                foreach($modelOrdersDetails as $modelOrdersDetail){
                     echo '
                             <tr>
                                 <td>'.$i++.'</td>
-                                <td>'.$modelOrder->product->name.'</td>
-                                <td>'.$modelOrder->quantity.'</td>
-                                <td>'.$modelOrder->total_price.'</td>
+                                <td>'.$modelOrdersDetail->product->name.'</td>
+                                <td>'.$modelOrdersDetail->product->price.'<span class="money-sign"> &#2547</span></td>
+                                <td>'.$modelOrdersDetail->quantity.'</td>
+                                <td>'.$modelOrdersDetail->total_price.'<span class="money-sign"> &#2547</span></td>
                             </tr>
                         ';
                 }
@@ -130,23 +132,23 @@ $this->params['breadcrumbs'][] = $this->title;
                 echo "<table class='table table-striped table-light'>
                             <p><b>Invoice Total</b></p><hr>
                             <tbody>";
-                $total_due = $modelInvoiceDetails[0]->orders['total_price']-$modelInvoiceTotal;
+                $total_due = $modelOrders[0]->total_price - $modelOrders[0]->total_paid;
                 echo '
                         <tr>
                             <td>Total Price</td>
-                            <td>'.$modelInvoiceDetails[0]->orders['total_price'].'</td>
+                            <td>'.$modelOrders[0]->total_price.'<span class="money-sign"> &#2547</span></td>
                         </tr>
                         <tr>
                             <td>Paid Amount</td>
-                            <td>'.$modelInvoiceDetails[0]->paid_amount.'</td>
+                            <td>'.$modelInvoiceDetails[0]->paid_amount.'<span class="money-sign"> &#2547</span></td>
                         </tr>
                         <tr>
                             <td>Total Paid</td>
-                            <td>'.$modelInvoiceTotal.'</td>
+                            <td>'.$modelOrders[0]->total_paid.'<span class="money-sign"> &#2547</span></td>
                         </tr>
                         <tr>
                             <td>Total Due</td>
-                            <td>'.$total_due.'</td>
+                            <td>'.$total_due.'<span class="money-sign"> &#2547</span></td>
                         </tr>
                     ';
                 echo "</tbody>

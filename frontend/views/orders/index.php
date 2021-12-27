@@ -12,6 +12,8 @@ use common\models\User;
 $this->title = 'Orders';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
+
+
 <div class="orders-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
@@ -26,7 +28,9 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+            [
+                'class' => 'yii\grid\SerialColumn',
+            ],
 
             //'order_id',
             //'user_id',
@@ -35,7 +39,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function ($data){ return $data->user->username; },
             ],
             'order_no',
-            'total_price',
+            //'total_price',
+
+            [
+                'label' => 'Total Price',
+                'attribute' => 'total_price',
+                'value' => function ($data){ return $data->total_price." ৳"; },
+            ],
+
+            [
+                'label' => 'Paid Amount',
+                'attribute' => 'total_paid',
+                'value' => function ($data){ return $data->total_paid." ৳"; },
+            ],
+
+            //'total_paid',
             // 'status',
             //'created_at',
             //'updated_at',
@@ -54,6 +72,8 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             ['class' => 'yii\grid\ActionColumn'],
+
+
         ],
     ]); ?>
 
